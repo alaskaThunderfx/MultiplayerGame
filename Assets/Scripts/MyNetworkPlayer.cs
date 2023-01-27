@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using Mirror;
 using TMPro;
 using UnityEngine;
@@ -10,6 +12,9 @@ public class MyNetworkPlayer : NetworkBehaviour
     [SerializeField] private TMP_Text displayNameText = null;
     [SerializeField] private Renderer displayColourRenderer = null;
 
+    private string[] _specialChars = { "*", "'", "!", "@", "#", "$", "%", "^", "&", "(", ")" };
+    private string[] _blacklistedWord = { "Jesus", "Friend", "Sora", "Donald", "Goofy" };
+    
     #region Server
     
     [Server]
@@ -27,6 +32,11 @@ public class MyNetworkPlayer : NetworkBehaviour
     [Command]
     private void CmdSetDisplayName(string newDisplayName)
     {
+        if (newDisplayName.Length is < 3 or > 15) return;
+        if (_specialChars.Any(newDisplayName.Contains)) return;
+        if (_blacklistedWord.Any(newDisplayName.Contains)) return;
+        if (newDisplayName.Any(char.IsWhiteSpace)) return;
+
         RpcLogNewName(newDisplayName);
         
         SetDisplayName(newDisplayName);
